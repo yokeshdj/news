@@ -4,14 +4,10 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEWS API</title>
+    <title>Sports News</title>
     <style>
-        .image{
-            height: 100px;
-            width: 100px;
-        }
         .post-card{
-            display: flex;
+            border: 1px black solid;
             margin: 10px;
         }
         #navBar{
@@ -32,41 +28,31 @@
     </div>
     <script type="text/javascript">
 
-        function fetchData(key){
-            return fetch(`https://newsapi.org/v2/top-headlines?country=in&apiKey=${key}`)
+        function fetchData(category,key){
+            return fetch(`https://newsapi.org/v2/top-headlines/sources?category=${category}&apiKey=${key}`)
             .then((response)=>response.json())
         }
         async function createPost(){
             var apiKey = "7655d4a5f1dc4b00b9508b1b78b1444d"
-            fetchData(apiKey)
-            .then((res)=>handleResponse(res.articles))
+            fetchData("sports",apiKey)
+            .then((res)=>handleResponse(res.sources))
             const handleResponse = function(data){
                 var div = document.createElement("div");
-                var count = 1;
                 for(article of data){
-                    if(count>10){
-                        break;
-                    }
                     var postData = createPostCard(article);
                     div.append(postData)
-                    count++;
                 }
                 document.body.append(div);
             }
         }
         function createPostCard(post){
             var div = document.createElement("div");
-            var content = document.createElement("div");
-            var poster = document.createElement("img");
-            var publishedAt = document.createElement("p");
+            var source = document.createElement("p");
             var title = document.createElement("h3");
-            title.textContent = post.title;
-            poster.src = post.urlToImage;
-            poster.className = "image"
-            publishedAt.textContent = post.publishedAt;
+            title.textContent = post.description;
+            source.textContent = "Source : "+post.name;
             div.className = "post-card";
-            content.append(title,publishedAt)
-            div.append(poster,content)
+            div.append(title,source)
             return div;
         }
         createPost();

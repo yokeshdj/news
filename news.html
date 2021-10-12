@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEWS API</title>
+    <style>
+        .image{
+            height: 100px;
+            width: 100px;
+        }
+        .post-card{
+            display: flex;
+            margin: 10px;
+        }
+        #navBar{
+            display: flex;
+            justify-content: end;
+            gap: 10px;
+            padding-right: 100px;
+        }
+    </style>
+</head>
+<body>
+    <nav id="navBar">
+        <div><a href="sports.html">Sports</a></div>
+        <div><a href="entertainment.html">Entertainment</a></div>
+        <div><a href="technology.html">Technology</a></div>
+    </nav>
+    <div id="news">
+    </div>
+    <script type="text/javascript">
+
+        function fetchData(key){
+            return fetch(`https://newsapi.org/v2/top-headlines?country=in&apiKey=${key}`)
+            .then((response)=>response.json())
+        }
+        async function createPost(){
+            var apiKey = "7655d4a5f1dc4b00b9508b1b78b1444d"
+            fetchData(apiKey)
+            .then((res)=>handleResponse(res.articles))
+            const handleResponse = function(data){
+                var div = document.createElement("div");
+                var count = 1;
+                for(article of data){
+                    if(count>10){
+                        break;
+                    }
+                    var postData = createPostCard(article);
+                    div.append(postData)
+                    count++;
+                }
+                document.body.append(div);
+            }
+        }
+        function createPostCard(post){
+            var div = document.createElement("div");
+            var content = document.createElement("div");
+            var poster = document.createElement("img");
+            var publishedAt = document.createElement("p");
+            var title = document.createElement("h3");
+            title.textContent = post.title;
+            poster.src = post.urlToImage;
+            poster.className = "image"
+            publishedAt.textContent = post.publishedAt;
+            div.className = "post-card";
+            content.append(title,publishedAt)
+            div.append(poster,content)
+            return div;
+        }
+        createPost();
+    </script>
+</body>
+</html>

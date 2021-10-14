@@ -1,20 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NEWS API</title>
     <style>
-        .image{
+        .image {
             height: 100px;
             width: 100px;
         }
-        .post-card{
+
+        .post-card {
             display: flex;
             margin: 10px;
         }
-        #navBar{
+
+        #navBar {
             display: flex;
             justify-content: end;
             gap: 10px;
@@ -22,39 +25,44 @@
         }
     </style>
 </head>
+
 <body>
     <nav id="navBar">
+        <form id="form">
+            <input type="text" name="" id="search">
+            <input type="submit" value="Search">
+        </form>
         <div><a href="sports.html">Sports</a></div>
         <div><a href="entertainment.html">Entertainment</a></div>
         <div><a href="technology.html">Technology</a></div>
     </nav>
     <div id="news">
     </div>
-    <script type="text/javascript">
+    <div id="pages">
 
-        function fetchData(key){
-            return fetch(`https://newsapi.org/v2/top-headlines?country=in&apiKey=${key}`)
-            .then((response)=>response.json())
-        }
-        async function createPost(){
-            var apiKey = "7655d4a5f1dc4b00b9508b1b78b1444d"
-            fetchData(apiKey)
-            .then((res)=>handleResponse(res.articles))
-            const handleResponse = function(data){
-                var div = document.createElement("div");
-                var count = 1;
-                for(article of data){
-                    if(count>10){
-                        break;
-                    }
-                    var postData = createPostCard(article);
-                    div.append(postData)
-                    count++;
+    </div>
+    <script type="text/javascript">
+        var apiKey = "7655d4a5f1dc4b00b9508b1b78b1444d"
+        function fetchData(type,pageNo) {
+            if(!pageNo){
+                return fetch(`https://newsapi.org/v2/${type}&pageSize=10&apiKey=${apiKey}`)
+                    .then((response) => response.json())        
                 }
-                document.body.append(div);
+            else{
+                return fetch(`https://newsapi.org/v2/${type}&pageSize=10&page=${pageNo}&apiKey=${apiKey}`)
+                    .then((response) => response.json())
             }
         }
-        function createPostCard(post){
+        async function handleResponse(data) {
+                var div = document.createElement("div");
+                for (article of data) {
+                    var postData = createPostCard(article);
+                    div.append(postData)
+                }
+                newsHolder.append(div);
+            }
+
+        function createPostCard(post) {
             var div = document.createElement("div");
             var content = document.createElement("div");
             var poster = document.createElement("img");
@@ -65,11 +73,63 @@
             poster.className = "image"
             publishedAt.textContent = post.publishedAt;
             div.className = "post-card";
-            content.append(title,publishedAt)
-            div.append(poster,content)
+            content.append(title, publishedAt)
+            div.append(poster, content)
             return div;
         }
-        createPost();
+        async function handleSearch() {
+            try{
+                event.preventDefault();
+                const query = document.getElementById("search").value;
+                var type = `everything?q=${query}`
+                newsHolder.innerHTML = null;
+                var res = await fetchData(type,currentValue)
+                handleResponse(res.articles);
+                createPagination();
+            }
+            catch{}
+        }
+        function managePage(){
+            console.log(event.target.textContent);
+            if(event.target.textContent == "Next"){
+                currentValue++;
+            }
+            else if(event.target.textContent == "Previous")
+                currentValue--;   
+            console.log(event.target.name);
+            createPagination();
+            handleSearch();
+        }
+        function createPagination() {
+            var pages = document.getElementById("pages")
+            pages.innerHTML = null;
+            var div = document.createElement("div");
+            const prevBtn = document.createElement("button");
+            const currentBtn = document.createElement("button");
+            const nextBtn = document.createElement("button");
+            prevBtn.textContent = "Previous";
+            prevBtn.name = currentValue-1;
+            nextBtn.name = currentValue+1;
+            currentBtn.name = currentValue;
+            currentBtn.textContent = currentValue;
+            nextBtn.textContent = "Next";
+            div.addEventListener("click",managePage)
+            if (currentValue === 1) {
+                prevBtn.disabled = true;
+            }
+            div.append(prevBtn,currentBtn,nextBtn)
+            pages.append(div);
+        }
+        window.addEventListener("load",function(){
+            var type = "top-headlines?country=in";
+            fetchData(type)
+                    .then((res) => handleResponse(res.articles))
+        })
+        var form = document.getElementById("form");
+        form.addEventListener("submit", handleSearch)
+        var currentValue = 1;
+        const newsHolder = document.getElementById("news");
     </script>
 </body>
+
 </html>
